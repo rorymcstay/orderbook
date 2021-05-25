@@ -65,16 +65,7 @@ public:
     int traderID() const { return _traderID; }
     void settraderID(int traderID_) { _traderID = traderID_; }
     void setEntryTimeNow() { _entryTime = std::chrono::system_clock::now(); }
-
-    bool operator< (const Order& other_) const 
-    {
-        if (almost_equal(_price, other_.price()))
-            return _entryTime < other_._entryTime;
-        return _side == Side::Buy ? less_than(_price, other_.price()) : greater_than(_price, other_.price());
-    }
-    bool operator> (const Order& other_) const { return other_ < *this; }
-    bool operator== (const Order& other_) const { return !(other_ > *this || other_ < *this); }
-    bool operator!= (const Order& other_) const { return !(other_ == *this); }
+    timestamp_t entryTime() { return _entryTime; }
 
     qty_t ordQty() const { return _ordQty; }
     void setordQty(qty_t newQty_) { _ordQty = newQty_; }
@@ -115,7 +106,6 @@ class ExecReport
     price_t    _lastPrice;
     std::string _text;
     timestamp_t _timestamp;
-
 public:
     using Ptr = std::shared_ptr<ExecReport>;
     ExecReport(const Order::Ptr& order_, ExecType execType_)
@@ -181,5 +171,20 @@ public:
             resetMessageCount();
         }
         return false;
+    }
+};
+
+class OrderCompare
+{
+public:
+
+    bool operator () (const Order::Ptr &self_, const Order::Ptr &other_)
+    {
+        if (almost_equal(self_->price(), other_->price()))
+        {
+            // favour orders entered before other orders
+            return self_->entryTime() > other_->entryTime();
+        }
+        return (self_->side() == Side::Buy) ? less_than(self_->price(), other_->price()) : greater_than(self_->price(), other_->price());
     }
 };

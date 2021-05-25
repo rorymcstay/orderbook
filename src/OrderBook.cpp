@@ -51,16 +51,19 @@ void OrderBook::matchingRoutine()
 }
 
 
-bool OrderBook::isValidPrice(price_t price_) const
+bool OrderBook::isTickAligned(price_t price_) const
 {
     if (((int)std::round(price_*100) % (int)std::round(tickSize()*100)) != 0)
         return false;
+    return true;
+}
+
+bool OrderBook::isValidPrice(price_t price_) const
+{
     if (std::abs(_closePrice - price_) > 10)
         return false;
     return true;
-
 }
-
 
 void OrderBook::updateLevel(Side side_, price_t price_, qty_t qty_)
 {
@@ -70,7 +73,6 @@ void OrderBook::updateLevel(Side side_, price_t price_, qty_t qty_)
     size_t level = (price_ - normaliser)/_tickSize;
     levels[level] += qty_;
 }
-
 
 qty_t OrderBook::qtyAtLevel(Side side_, price_t price_) const
 {
@@ -108,10 +110,16 @@ void OrderBook::onOrderSingle(Order::Ptr& order_)
     order_->setorderID(++_oidSeed);
     std::lock_guard<decltype(_mutex)> lock(_mutex);
     auto& orderQueue = getOrderQueue(order_->side());
-    if (not isValidPrice(order_->price()))
+    if (not isTickAligned(order_->price()))
     {
         INFO("Order price is not a multiple of ticksize" << LOG_VAR(order_->price()) << LOG_VAR(_tickSize));
         rejectNewOrderRequest(order_, "Order_price_is_not_multiple_of_ticksize");
+        return;
+    }
+    if (not isValidPrice(order_->price()))
+    {
+        INFO("Order price is not a multiple of within threshold (10) of" << LOG_VAR(_closePrice) << LOG_VAR(order_->price()));
+        rejectNewOrderRequest(order_, "Order_price_is_outside_threshold_of_closePrice");
         return;
     }
     auto traderID = order_->traderID();
@@ -230,7 +238,7 @@ void OrderBook::onOrderCancelRequest(const Order::Ptr &order_)
 
 bool OrderBook::canCross(const Order::Ptr& buy_, const Order::Ptr& sell_)
 {
-    if (buy_->price() >= sell_->price())
+    if (greater_equal(buy_->price(), sell_->price()))
         return true;
     else
         return false;

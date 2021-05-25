@@ -165,13 +165,13 @@ public:
     // operator out >>
     void operator>> (const std::string& str_)
     {
-        std::this_thread::sleep_for(std::chrono::microseconds(100));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
         if (str_.find("NONE") != std::string::npos)
         {
             auto message = _orderBook->getExecMessage();
             if (message != nullptr)
             {
-                FAIL() << str_ << " Unexpected event: " << LOG_VAR(message->orderID())
+                FAIL() << str_ << " Unmatched event: " << LOG_VAR(message->orderID())
                 << LOG_VAR(message->text()) << LOG_VAR(message->execType())
                 << LOG_VAR(message->price()) << LOG_VAR(message->ordQty())
                 << LOG_VAR(message->cumQty()) << LOG_VAR(message->lastQty())
@@ -186,7 +186,7 @@ public:
         ExecReport::Ptr execReport = _orderBook->getExecMessage();
         if (!execReport)
         {
-            FAIL() << "Unmatched event: " <<  str_;
+            FAIL() << "Unmatched filter: " <<  str_;
         }
         auto execType = params.at("ExecType");
         auto ordStatus = params.at("OrdStatus");

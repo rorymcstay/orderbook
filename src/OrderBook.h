@@ -15,7 +15,7 @@
 class OrderBook
 {
 
-    using OrderQueue=std::priority_queue<Order::Ptr>;
+    using OrderQueue=std::priority_queue<Order::Ptr, std::vector<Order::Ptr>, OrderCompare>;
     using Traders=std::unordered_map<int, Trader::Ptr>;
     using RootOrderMap=std::unordered_map<int, Order::Ptr>;
 
@@ -61,6 +61,7 @@ private:
     static bool canCross(const Order::Ptr& buyOrder_, const Order::Ptr& sellOrder_);
     Order::Ptr getLiveOrder(Side side_);
     OrderQueue& getOrderQueue(Side side_);
+    bool isTickAligned(price_t price_) const;
     bool isValidPrice(price_t price_) const;
 public:
     price_t tickSize() const { return _tickSize; }
@@ -73,4 +74,6 @@ public:
 
     void start();
     void stop();
+
+
 };

@@ -83,6 +83,34 @@ TEST(OrderBook, trader_can_modify_quantity_down_on_order)
     env >> "NONE" LN;
 }
 
+TEST(OrderBook, alcova_example)
+{
+    TestEnv env("XYZ", 50.32);
+    env << "NewOrder Price=50.34 OrdQty=30 Side=Sell TraderID=1" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.34 Side=Sell OrdQty=30 LastQty=0 CumQty=0 LastPrice=0 OrderID=1" LN;
+    env << "NewOrder Price=50.32 OrdQty=20 Side=Sell TraderID=2" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.32 Side=Sell OrdQty=20 LastQty=0 CumQty=0 LastPrice=0 OrderID=2" LN;
+    env << "NewOrder Price=50.31 OrdQty=20 Side=Buy TraderID=4" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.31 Side=Buy OrdQty=20 LastQty=0 CumQty=0 LastPrice=0 OrderID=3" LN;
+    env << "NewOrder Price=50.31 OrdQty=40 Side=Buy TraderID=3" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.31 Side=Buy OrdQty=40 LastQty=0 CumQty=0 LastPrice=0 OrderID=4" LN;
+    env << "NewOrder Price=50.30 OrdQty=10 Side=Buy TraderID=5" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.30 Side=Buy OrdQty=10 LastQty=0 CumQty=0 LastPrice=0 OrderID=5" LN;
+    env << "NewOrder Price=50.30 OrdQty=15 Side=Buy TraderID=6" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.30 Side=Buy OrdQty=15 LastQty=0 CumQty=0 LastPrice=0 OrderID=6" LN;
+    env >> "NONE" LN;
+
+    // sell order for 25 shares
+    env << "NewOrder Side=Sell Price=50.31 OrdQty=25 TraderID=7" LN;
+    env >> "ExecReport ExecType=New OrdStatus=New Price=50.31 Side=Sell OrdQty=25 LastQty=0 CumQty=0 LastPrice=0 OrderID=7" LN;
+    // 4 trades come out, 2 matches occur
+    env >> "ExecReport ExecType=Trade OrdStatus=PartiallyFilled Price=50.31 Side=Sell OrdQty=25 CumQty=20 LastPrice=50.31 LastQty=20 OrderID=7" LN;
+    env >> "ExecReport ExecType=Trade OrdStatus=Filled Price=50.31 Side=Buy OrdQty=20 CumQty=20 LastPrice=50.31 LastQty=20 OrderID=3" LN;
+    env >> "ExecReport ExecType=Trade OrdStatus=Filled Price=50.31 Side=Sell OrdQty=25 CumQty=25 LastPrice=50.31 LastQty=5 OrderID=7" LN;
+    env >> "ExecReport ExecType=Trade OrdStatus=PartiallyFilled Price=50.31 Side=Buy OrdQty=40 CumQty=5 LastPrice=50.31 LastQty=5 OrderID=4" LN;
+    env >> "NONE" LN;
+
+}
 
 
 int main(int argc, char **argv) {
