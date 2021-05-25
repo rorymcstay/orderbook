@@ -1,0 +1,13 @@
+build
+.idea
+cmake-build-debug
+lib/
+bin/
+install
+*.csv
+*.zip
+.cache
+.gdb_history
+.*swp
+bin
+*.log
