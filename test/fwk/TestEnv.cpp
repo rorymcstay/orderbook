@@ -171,11 +171,11 @@ public:
             auto message = _orderBook->getExecMessage();
             if (message != nullptr)
             {
-                FAIL() << str_ << " Unmatched event: " << LOG_VAR(message->orderID())
-                << LOG_VAR(message->text()) << LOG_VAR(message->execType())
-                << LOG_VAR(message->price()) << LOG_VAR(message->ordQty())
-                << LOG_VAR(message->cumQty()) << LOG_VAR(message->lastQty())
-                << LOG_VAR(message->lastPrice()) << LOG_VAR(message->ordStatus());
+                FAIL() << str_ << " Unmatched event: " << LOG_NVP("OrderID", message->orderID())
+                << LOG_NVP("Text", message->text()) << LOG_NVP("ExecType",message->execType())
+                << LOG_NVP("Price",message->price()) << LOG_NVP("OrdQty", message->ordQty())
+                << LOG_NVP("CumQty", message->cumQty()) << LOG_NVP("LastQty",message->lastQty())
+                << LOG_NVP("LastQty", message->lastPrice()) << LOG_NVP("OrdStatus", message->ordStatus());
             }
             return;
         }
