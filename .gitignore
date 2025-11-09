@@ -11,3 +11,4 @@ install
 .*swp
 bin
 *.log
+include/

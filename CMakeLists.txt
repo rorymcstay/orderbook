@@ -23,7 +23,17 @@ if(${GTest_FOUND} EQUAL "FALSE")
     message(FATAL "Gtest not found!")
 endif(${GTest_FOUND} EQUAL "FALSE")
 
-include_directories(${GTEST_INCLUDE_DIRS})
+include(FetchContent)
+
+# Fetch GoogleTest (no need to install manually)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+)
+# Prevent GoogleTest from overriding compiler settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
 
 add_executable(book src/main.cpp)
 
@@ -32,11 +42,12 @@ add_library(orderbook
         src/Domain.cpp
         src/ExecWriter.cpp)
 
+enable_testing()
 add_executable(test_orderbook 
     test/fwk/TestEnv.cpp
     test/main.cpp
 )
-target_link_libraries(test_orderbook ${GTEST_LIBRARIES} pthread orderbook)
+target_link_libraries(test_orderbook GTest::gtest_main pthread orderbook)
 
 target_link_libraries(book orderbook pthread)
 
